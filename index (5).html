@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Quale Supereroe Sei? — Quiz</title>
+<meta name="description" content="Scopri quale supereroe ti rappresenta rispondendo a 12 domande.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B0B10;
+    --paper:#F5F1E6;
+    --yellow:#FFC93C;
+    --red:#E63946;
+    --blue:#3A86FF;
+    --purple:#7B2CBF;
+    --line: 4px;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background-color: var(--ink);
+    background-image:
+      radial-gradient(rgba(245,241,230,0.08) 1px, transparent 1px);
+    background-size: 14px 14px;
+    font-family:'Space Grotesk', system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    padding: 20px;
+    gap: 4px;
+  }
+  .stage{
+    width:100%;
+    max-width: 480px;
+  }
+  .panel{
+    background: var(--paper);
+    border: var(--line) solid var(--ink);
+    border-radius: var(--radius);
+    box-shadow: 8px 8px 0 var(--ink);
+    padding: 28px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .halftone-corner{
+    position:absolute;
+    top:-40px; right:-40px;
+    width:140px; height:140px;
+    background-image: radial-gradient(var(--ink) 3px, transparent 3.2px);
+    background-size: 14px 14px;
+    opacity:0.12;
+    border-radius:50%;
+    pointer-events:none;
+  }
+  h1,h2,h3{
+    font-family:'Bangers', cursive;
+    letter-spacing: 0.5px;
+    margin:0 0 6px;
+    line-height:1.05;
+  }
+  .eyebrow{
+    display:inline-block;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: var(--red);
+    color: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 4px 12px;
+    transform: rotate(-2deg);
+    margin-bottom: 14px;
+  }
+
+  /* ---------- INTRO ---------- */
+  #screen-intro h1{
+    font-size: 44px;
+    color: var(--ink);
+    text-shadow: 3px 3px 0 var(--yellow);
+    margin-bottom: 10px;
+  }
+  #screen-intro p{
+    font-size: 15px;
+    line-height:1.5;
+    margin: 0 0 22px;
+    opacity:0.85;
+  }
+  .hero-strip{
+    display:flex;
+    gap:8px;
+    font-size: 30px;
+    margin-bottom: 22px;
+  }
+  .hero-strip span{
+    background: var(--paper);
+    border:3px solid var(--ink);
+    border-radius: 10px;
+    width: 52px;
+    height: 52px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    font-family:'Bangers', cursive;
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: var(--ink);
+    background: var(--yellow);
+    border: var(--line) solid var(--ink);
+    border-radius: 10px;
+    padding: 14px 20px;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 5px 5px 0 var(--ink);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active{
+    transform: translate(4px,4px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+  .btn:focus-visible{
+    outline: 3px solid var(--blue);
+    outline-offset: 3px;
+  }
+  .btn-secondary{
+    background: var(--paper);
+  }
+
+  /* ---------- QUIZ ---------- */
+  #screen-quiz{ display:none; }
+  .progress-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom: 18px;
+  }
+  .progress-track{
+    flex:1;
+    height: 14px;
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background: repeating-linear-gradient(
+      45deg,
+      var(--red), var(--red) 8px,
+      var(--yellow) 8px, var(--yellow) 16px
+    );
+    width: 0%;
+    transition: width 0.35s ease;
+  }
+  .progress-label{
+    font-weight:700;
+    font-size: 13px;
+    white-space:nowrap;
+  }
+  .question-text{
+    font-family:'Bangers', cursive;
+    font-size: 26px;
+    line-height:1.15;
+    margin: 4px 0 18px;
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+  .option{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    text-align:left;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    background: var(--paper);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor:pointer;
+    box-shadow: 4px 4px 0 var(--ink);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .option:hover{ background: #fff; }
+  .option:active{
+    transform: translate(3px,3px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+  .option:focus-visible{
+    outline: 3px solid var(--blue);
+    outline-offset: 2px;
+  }
+  .option .letter{
+    flex:0 0 auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    font-family:'Bangers', cursive;
+    font-size: 16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .back-link{
+    display:inline-block;
+    margin-top: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    opacity: 0.6;
+    text-decoration: underline;
+    cursor: pointer;
+    background:none;
+    border:none;
+    padding:6px 0;
+  }
+
+  /* ---------- RESULT ---------- */
+  #screen-result{ display:none; text-align:center; }
+  .burst{
+    width: 130px; height:130px;
+    margin: 0 auto 6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 62px;
+    background: var(--yellow);
+    border: var(--line) solid var(--ink);
+    border-radius: 50%;
+    box-shadow: 6px 6px 0 var(--ink);
+    position:relative;
+  }
+  #result-eyebrow{
+    font-family:'Bangers', cursive;
+    font-size: 15px;
+    letter-spacing:2px;
+    color: var(--red);
+    margin-top: 14px;
+  }
+  #result-name{
+    font-size: 40px;
+    margin-bottom: 12px;
+  }
+  #result-desc{
+    text-align:left;
+    font-size: 14.5px;
+    line-height: 1.6;
+    white-space: pre-line;
+    margin-bottom: 22px;
+  }
+  #result-score{
+    font-size: 12px;
+    font-weight:600;
+    opacity:0.55;
+    margin-bottom: 18px;
+  }
+  .footer-note{
+    text-align:center;
+    color: var(--paper);
+    opacity:0.5;
+    font-size:12px;
+    margin-top: 16px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .btn, .option, .progress-fill{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- INTRO -->
+  <div class="panel" id="screen-intro">
+    <div class="halftone-corner"></div>
+    <span class="eyebrow">Test di personalità</span>
+    <h1>Quale supereroe sei?</h1>
+    <p>Rispondi a 12 domande veloci e scopri quale eroe o eroina rispecchia di più la tua personalità. Nessuna risposta giusta o sbagliata: fidati del tuo istinto!</p>
+    <div class="hero-strip">
+      <span>🦸</span><span>⚔️</span><span>🤖</span><span>🦇</span><span>🕷️</span>
+    </div>
+    <button class="btn" id="btn-start">Inizia il quiz →</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="panel" id="screen-quiz">
+    <div class="halftone-corner"></div>
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-label" id="progress-label">1 / 12</div>
+    </div>
+    <h2 class="question-text" id="question-text"></h2>
+    <div class="options" id="options-container"></div>
+    <button class="back-link" id="btn-back">← domanda precedente</button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="panel" id="screen-result">
+    <div class="halftone-corner"></div>
+    <div class="burst" id="result-emoji">🦸</div>
+    <div id="result-eyebrow">SEI...</div>
+    <h1 id="result-name">Superman</h1>
+    <div id="result-desc"></div>
+    <div id="result-score"></div>
+    <button class="btn" id="btn-restart">Rifai il quiz ↺</button>
+  </div>
+
+</div>
+
+<p class="footer-note">Fatto per l'evento — buon divertimento! 🎉</p>
+
+<script>
+(function(){
+
+  const QUESTIONS = [
+    {
+      q: "Qual è la tua più grande debolezza?",
+      options: [
+        { label: "Il mio ego", points: 30 },
+        { label: "La mia statura / la mia stazza", points: 50 },
+        { label: "Il mio lato oscuro", points: 40 },
+        { label: "Il mio temperamento", points: 20 },
+        { label: "Le persone che amo", points: 10 },
+      ]
+    },
+    {
+      q: "Come trascorri il tuo tempo libero?",
+      options: [
+        { label: "Giocando ai videogiochi", points: 40 },
+        { label: "Studiando", points: 50 },
+        { label: "Uscendo con gli amici", points: 20 },
+        { label: "Facendo volontariato", points: 10 },
+        { label: "Dedicandomi ai miei hobby", points: 30 },
+      ]
+    },
+    {
+      q: "Nick Fury ti chiede di entrare negli Avengers. Cosa fai?",
+      options: [
+        { label: "Accetto con entusiasmo!", points: 50 },
+        { label: "Accetto, ma solo part-time", points: 10 },
+        { label: "Prima faccio un controllo approfondito su Nick Fury", points: 20 },
+        { label: "Accetto, ma solo in cambio di un bel compenso", points: 30 },
+        { label: "Gli dico che preferisco lavorare da solo/a", points: 40 },
+      ]
+    },
+    {
+      q: "Come ti descriverebbero gli altri con una sola parola?",
+      options: [
+        { label: "Indipendente", points: 40 },
+        { label: "Leale", points: 50 },
+        { label: "Compassionevole", points: 20 },
+        { label: "Affidabile", points: 10 },
+        { label: "Sicuro/a di sé", points: 30 },
+      ]
+    },
+    {
+      q: "Qual è il miglior mezzo di trasporto... senza superpoteri?",
+      options: [
+        { label: "Correre", points: 10 },
+        { label: "Un'auto sportiva", points: 30 },
+        { label: "La metropolitana", points: 50 },
+        { label: "Un aereo", points: 20 },
+        { label: "Una motocicletta", points: 40 },
+      ]
+    },
+    {
+      q: "Scegli il tuo sport olimpico preferito",
+      options: [
+        { label: "Atletica leggera", points: 10 },
+        { label: "Ginnastica", points: 50 },
+        { label: "Karate", points: 40 },
+        { label: "Tiro con l'arco", points: 30 },
+        { label: "Lotta / wrestling", points: 20 },
+      ]
+    },
+    {
+      q: "Joker è evaso da Arkham Asylum e sai dove si nasconde. Cosa fai?",
+      options: [
+        { label: "Lo arresto e poi avviso la polizia", points: 50 },
+        { label: "Avviso prima la polizia", points: 20 },
+        { label: "Ingaggio qualcun altro per arrestarlo", points: 30 },
+        { label: "Lo riporto personalmente ad Arkham", points: 10 },
+        { label: "Lo uso come esca per trovare il suo quartier generale segreto", points: 40 },
+      ]
+    },
+    {
+      q: "Come preferisci combattere il crimine?",
+      options: [
+        { label: "Guidando una squadra", points: 30 },
+        { label: "Insieme ai miei amici", points: 50 },
+        { label: "Da solo/a", points: 40 },
+        { label: "Da solo/a, ma accettando aiuto quando necessario", points: 20 },
+        { label: "In coppia", points: 10 },
+      ]
+    },
+    {
+      q: "Ti affidi di più al cervello o alla forza?",
+      options: [
+        { label: "Parto dal cervello, ma adoro anche usare la forza", points: 40 },
+        { label: "È il mio cervello a rendermi più forte", points: 30 },
+        { label: "Mi piace usare entrambi", points: 50 },
+        { label: "Uso la forza in modo intelligente", points: 20 },
+        { label: "Principalmente la forza", points: 10 },
+      ]
+    },
+    {
+      q: "Qual è il tuo film di supereroi preferito?",
+      options: [
+        { label: "Spider-Man: Across the Spider-Verse", points: 30 },
+        { label: "Captain Marvel", points: 20 },
+        { label: "Avengers: Endgame", points: 10 },
+        { label: "Thunderbolts*", points: 50 },
+        { label: "Deadpool & Wolverine", points: 40 },
+      ]
+    },
+    {
+      q: "Qual è la cosa peggiore su cui hai mentito?",
+      options: [
+        { label: "I soldi", points: 30 },
+        { label: "I miei sentimenti", points: 20 },
+        { label: "Le mie paure", points: 10 },
+        { label: "I compiti", points: 50 },
+        { label: "I miei crimini", points: 40 },
+      ]
+    },
+    {
+      q: "Thanos sta per schioccare le dita. Cosa fai?",
+      options: [
+        { label: "Cerco di atterrare Thanos lottando con lui", points: 40 },
+        { label: "Uso la tecnologia da supereroe per rompere il Guanto dell'Infinito", points: 30 },
+        { label: "Mi lancio verso di lui e provo a rubargli il Guanto dell'Infinito", points: 50 },
+        { label: "Lo immobilizzo e distruggo il Guanto dell'Infinito", points: 20 },
+        { label: "Abbatto Thanos con dei laser", points: 10 },
+      ]
+    },
+  ];
+
+  const RESULTS = [
+    {
+      max: 200,
+      emoji: "🦸",
+      name: "SUPERMAN",
+      desc: "Hai molte capacità e cerchi di utilizzarle anche per aiutare gli altri e difendere ciò che ritieni giusto. Segui una forte bussola morale e hai idee abbastanza chiare su ciò che consideri giusto e sbagliato.\n\nNon è facile metterti davvero in difficoltà. Quando però incontri la tua personale \"kryptonite\", puoi contare su un ottimo gruppo di amici e familiari pronti a darti una mano.\n\nPuoi essere un po' testardo/a, ma sei bravo/a a trovare il modo di aiutare gli altri rimanendo fedele alle tue convinzioni.\n\nIl tuo punto di attenzione: ricordarti che può esistere più di un modo giusto per affrontare un problema."
+    },
+    {
+      max: 290,
+      emoji: "⚔️",
+      name: "WONDER WOMAN",
+      desc: "La tua compassione, gentilezza e intelligenza fanno di te un'ottima leader e molte persone tendono a considerarti un punto di riferimento.\n\nAvere molte responsabilità può qualche volta risultare pesante, ma rifletti sulle situazioni e non permetti alle piccole difficoltà di fermarti.\n\nRiesci a vedere il meglio nelle altre persone, anche quando non siete completamente d'accordo.\n\nE sei disposto/a a difenderle comunque, perché credi che tutti meritino un futuro migliore."
+    },
+    {
+      max: 390,
+      emoji: "🤖",
+      name: "IRON MAN",
+      desc: "Sei una persona sicura di sé ed estroversa e tendi a muoverti nella vita con una certa naturalezza.\n\nLa tua intelligenza ti permette di arrivare lontano e la tua disponibilità ad aiutare gli altri ti distingue.\n\nSei generoso/a con quello che hai e continui a lottare anche quando incontri degli ostacoli.\n\nLa tua forte personalità può però risultare impegnativa per alcune persone e talvolta rischia di allontanarle. Chi riesce a vedere oltre questo lato del tuo carattere, però, difficilmente ti abbandona.\n\nTutto questo fa di te un leader molto forte."
+    },
+    {
+      max: 490,
+      emoji: "🦇",
+      name: "BATMAN",
+      desc: "Hai lavorato duramente per conquistare ciò che possiedi: che si tratti delle tue capacità fisiche, della tua intelligenza oppure delle relazioni che hai costruito con gli altri.\n\nProprio per questo sei molto selettivo/a riguardo alle persone che lasci entrare davvero nella tua vita. Vuoi essere circondato/a da persone che ti comprendono realmente.\n\nIn generale preferisci lavorare da solo/a. Questo qualche volta può renderti un po' solitario/a, ma i tuoi amici possono aiutarti a uscire dal tuo guscio.\n\nE quando lo fai, diventa difficile fermare tutto il bene che sei capace di fare."
+    },
+    {
+      max: Infinity,
+      emoji: "🕷️",
+      name: "SPIDER-MAN",
+      desc: "Le persone sono attratte dal tuo umorismo, dalla tua arguzia e dalla tua intelligenza. Anche il tuo lato un po' timido e nerd fa parte del tuo fascino.\n\nPuoi avere molti amici, ma mantieni una cerchia più ristretta di persone veramente vicine.\n\nCerchi di risolvere le situazioni pacificamente e non tolleri che gli altri vengano trattati male. Sei disposto/a a difendere sia i tuoi amici sia persone che non conosci dalle ingiustizie.\n\nSe necessario, sei anche disposto/a a fare sacrifici per il bene degli altri.\n\nLe persone tendono a descriverti come coraggioso/a, leale e resiliente."
+    },
+  ];
+
+  let currentIndex = 0;
+  let answers = []; // points chosen per question
+
+  const screenIntro = document.getElementById('screen-intro');
+  const screenQuiz = document.getElementById('screen-quiz');
+  const screenResult = document.getElementById('screen-result');
+  const progressFill = document.getElementById('progress-fill');
+  const progressLabel = document.getElementById('progress-label');
+  const questionText = document.getElementById('question-text');
+  const optionsContainer = document.getElementById('options-container');
+  const btnBack = document.getElementById('btn-back');
+
+  const LETTERS = ['A','B','C','D','E'];
+
+  function showScreen(el){
+    [screenIntro, screenQuiz, screenResult].forEach(s => s.style.display = 'none');
+    el.style.display = 'block';
+    window.scrollTo({top:0, behavior:'instant' in window ? 'instant' : 'auto'});
+  }
+
+  function startQuiz(){
+    currentIndex = 0;
+    answers = [];
+    showScreen(screenQuiz);
+    renderQuestion();
+  }
+
+  function renderQuestion(){
+    const q = QUESTIONS[currentIndex];
+    const total = QUESTIONS.length;
+    progressFill.style.width = ((currentIndex) / total * 100) + '%';
+    progressLabel.textContent = (currentIndex + 1) + ' / ' + total;
+    questionText.textContent = q.q;
+    optionsContainer.innerHTML = '';
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.type = 'button';
+      btn.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span>' + opt.label + '</span>';
+      btn.addEventListener('click', () => selectOption(opt.points));
+      optionsContainer.appendChild(btn);
+    });
+    btnBack.style.visibility = currentIndex === 0 ? 'hidden' : 'visible';
+  }
+
+  function selectOption(points){
+    answers[currentIndex] = points;
+    if (currentIndex < QUESTIONS.length - 1){
+      currentIndex++;
+      renderQuestion();
+    } else {
+      finishQuiz();
+    }
+  }
+
+  function goBack(){
+    if (currentIndex > 0){
+      currentIndex--;
+      renderQuestion();
+    }
+  }
+
+  function finishQuiz(){
+    const total = answers.reduce((sum, p) => sum + p, 0);
+    const result = RESULTS.find(r => total <= r.max);
+    document.getElementById('result-emoji').textContent = result.emoji;
+    document.getElementById('result-name').textContent = result.name;
+    document.getElementById('result-desc').textContent = result.desc;
+    document.getElementById('result-score').textContent = 'Punteggio: ' + total + ' punti';
+    showScreen(screenResult);
+  }
+
+  document.getElementById('btn-start').addEventListener('click', startQuiz);
+  document.getElementById('btn-restart').addEventListener('click', startQuiz);
+  btnBack.addEventListener('click', goBack);
+
+})();
+</script>
+
+</body>
+</html>
